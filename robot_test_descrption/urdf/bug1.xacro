@@ -1,0 +1,165 @@
+<?xml version="1.0" ?>
+
+<robot name="bug1">
+ <!--xacro:arg name="laser_visual" default="true"/-->
+
+  <material name="black">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.203125 0.23828125 0.28515625 1.0"/>
+  </material>
+  <material name="green">
+    <color rgba="0.0 0.8 0.0 1.0"/>
+  </material>
+  <material name="grey">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+  <material name="orange">
+    <color rgba="1.0 0.423529411765 0.0392156862745 1.0"/>
+  </material>
+  <material name="brown">
+    <color rgba="0.870588235294 0.811764705882 0.764705882353 1.0"/>
+  </material>
+  <material name="red">
+    <color rgba="0.80078125 0.12890625 0.1328125 1.0"/>
+  </material>
+  <material name="white">
+    <color rgba="1.0 1.0 1.0 1.0"/>
+  </material>  
+
+  <gazebo reference="base_footprint">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="base_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <!--gazebo reference="link_right_wheel">
+    <material>Gazebo/Blue</material>
+  </gazebo-->
+
+  <!-- root link, on the ground just below the model origin -->
+  <link name="base_footprint">
+   <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.04" />              <!--cylinder length="0.04" radius="0.1"-->
+      </geometry>
+      <material name="orange"/>
+    </visual>
+  </link>
+
+  <joint name="base_link_joint" type="fixed">
+    <origin xyz="0.0 0 0.00" rpy="0 0 0" />
+    <parent link="base_footprint"/>
+    <child link="base_link" />
+  </joint>
+
+  <!-- the model -->
+  <link name="base_link">
+    <inertial>
+      <mass value="5" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.00052666666" ixy="0" ixz="0" iyy="0.00052666666" iyz="0" izz="0.001" />
+    </inertial>
+    <visual>
+      <geometry>
+        <cylinder length="0.04" radius="0.1" /> <!-- does not need to match collision -->
+        <material name="blue"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <cylinder length="0.04" radius="0.1" />
+
+      </geometry>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0</mu>
+            <mu2>0</mu2>
+            <slip1>1.0</slip1>
+            <slip2>1.0</slip2>
+          </ode>
+        </friction>
+      </surface>
+    </collision>
+  </link>
+
+  <joint name="scan_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_scan"/>
+    <origin xyz="0 0 0.04" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_scan">
+    <visual>
+      <origin xyz="0 0 0.0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0115" radius="0.045"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0.015 0 -0.0065" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0115" radius="0.045"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+
+  <gazebo>
+    <plugin name="object_controller" filename="libgazebo_ros_planar_move.so">
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <odometryRate>20.0</odometryRate>
+      <robotBaseFrame>base_footprint</robotBaseFrame>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="base_scan">
+    <material>Gazebo/FlatBlack</material>
+    <sensor type="ray" name="lds_lfcd_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>5</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>   <!--# The number of sample. Modify it to 24   360-->
+            <resolution>1</resolution>
+            <min_angle>0.0</min_angle>
+            <max_angle>6.28319</max_angle> <!--# The number of max_angle. Modify it to 24   6.28319-->
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.050</min>
+          <max>0.35</max>
+          <resolution>0.0015</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_laser.so">
+        <topicName>scan</topicName>
+        <frameName>base_scan</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>

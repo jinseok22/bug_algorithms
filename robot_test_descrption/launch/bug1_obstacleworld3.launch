@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <param name="robot_description" command="cat '$(find robot_test_descrption)/urdf/bug1.xacro'" />
+
+    <arg name="x" default="4.5"/>
+    <arg name="y" default="6.5"/>
+    <arg name="z" default="0.01"/>
+
+    <node name="mybot_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
+          args="-urdf -param robot_description -model bug1 -x $(arg x) -y $(arg y) -z $(arg z)" />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find robot_test_descrption)/world/obstacle3.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>.
+    <arg name="debug" value="false"/>
+  </include>
+
+</launch>
